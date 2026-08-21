@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 960" width="540" height="960">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1c1602" />
+      <stop offset="40%" stop-color="#40320a" />
+      <stop offset="70%" stop-color="#2a2004" />
+      <stop offset="100%" stop-color="#120e01" />
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffeea1" />
+      <stop offset="30%" stop-color="#d4af37" />
+      <stop offset="70%" stop-color="#aa7c11" />
+      <stop offset="100%" stop-color="#5a3d00" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="38%" r="45%">
+      <stop offset="0%" stop-color="#ffea9f" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.8"/>
+    </filter>
+  </defs>
+
+  <rect width="540" height="960" fill="url(#bg)"/>
+  <rect width="540" height="960" fill="url(#glow)"/>
+
+  <!-- Geometric Arabesque Top Frame -->
+  <g stroke="url(#gold)" stroke-width="1.5" fill="none" opacity="0.35">
+    <path d="M0,0 L270,120 L540,0 M0,20 L270,140 L540,20 M0,40 L270,160 L540,40"/>
+    <circle cx="270" cy="80" r="40"/>
+  </g>
+
+  <!-- Large Crescent Moon with Lantern -->
+  <g filter="url(#shadow)" transform="translate(270, 380)">
+    <!-- Crescent Moon -->
+    <path d="M 40,-160 A 180,180 0 1,0 120,150 A 150,150 0 1,1 40,-160 Z" fill="url(#gold)"/>
+    
+    <!-- Hanging Lantern from top -->
+    <line x1="0" y1="-380" x2="0" y2="-80" stroke="url(#gold)" stroke-width="3"/>
+    
+    <!-- Lantern -->
+    <g transform="translate(0, -50)">
+      <polygon points="-30,-30 30,-30 20,-50 -20,-50" fill="url(#gold)"/>
+      <rect x="-30" y="-30" width="60" height="60" rx="6" fill="#fff5cc" stroke="url(#gold)" stroke-width="4"/>
+      <polygon points="-30,30 30,30 0,60" fill="url(#gold)"/>
+      <!-- Glowing inner light -->
+      <circle cx="0" cy="0" r="18" fill="#ffe066" filter="url(#shadow)"/>
+    </g>
+  </g>
+
+  <!-- Stars -->
+  <g fill="url(#gold)" opacity="0.9">
+    <polygon points="120,220 124,232 136,232 126,240 130,252 120,244 110,252 114,240 104,232 116,232"/>
+    <polygon points="420,180 423,189 432,189 425,195 428,204 420,198 412,204 415,195 408,189 417,189"/>
+    <polygon points="380,520 383,529 392,529 385,535 388,544 380,538 372,544 375,535 368,529 377,529"/>
+  </g>
+
+  <!-- Arabic / English Typography -->
+  <text x="270" y="720" font-family="'Cinzel', 'Trajan Pro', 'Georgia', serif" font-size="36" font-weight="bold" fill="url(#gold)" text-anchor="middle" filter="url(#shadow)">RAMADAN MUBARAK</text>
+  <text x="270" y="760" font-family="'Georgia', serif" font-size="16" font-weight="normal" fill="#e6c280" text-anchor="middle" letter-spacing="4">SEASON OF BLESSINGS</text>
+</svg>

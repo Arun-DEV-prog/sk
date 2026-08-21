@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 960" width="540" height="960">
+  <defs>
+    <linearGradient id="ruby" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#800000" />
+      <stop offset="35%" stop-color="#cc0000" />
+      <stop offset="70%" stop-color="#660000" />
+      <stop offset="100%" stop-color="#2b0000" />
+    </linearGradient>
+    <radialGradient id="sparkle" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#ffb3b3" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#800000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-color="#000000" flood-opacity="0.7"/>
+    </filter>
+  </defs>
+
+  <rect width="540" height="960" fill="url(#ruby)"/>
+  <rect width="540" height="960" fill="url(#sparkle)"/>
+
+  <!-- Sparkling Bokeh -->
+  <g fill="#ffffff" opacity="0.6">
+    <circle cx="100" cy="180" r="4"/><circle cx="220" cy="100" r="6"/><circle cx="440" cy="140" r="5"/>
+    <circle cx="80" cy="380" r="3"/><circle cx="480" cy="420" r="7"/><circle cx="160" cy="520" r="4"/>
+    <circle cx="380" cy="620" r="5"/><circle cx="260" cy="780" r="6"/>
+  </g>
+
+  <!-- Two Glass Hearts with Red Liquid -->
+  <g filter="url(#shadow)" transform="translate(270, 380)">
+    <!-- Main Big Heart Glass -->
+    <path d="M 120,-80 A 90,90 0 0,0 -30,-50 A 90,90 0 0,0 -180,-80 Q -240,20 -30,180 Q 180,20 120,-80 Z" fill="none" stroke="#ffffff" stroke-width="6" opacity="0.8"/>
+    
+    <!-- Red Liquid Inside Main Heart -->
+    <path d="M 110,-40 Q -30,20 -170,-40 Q -220,20 -30,170 Q 160,20 110,-40 Z" fill="#b30000" opacity="0.9"/>
+
+    <!-- Small Front Heart Glass -->
+    <path d="M 0,20 A 60,60 0 0,0 -100,40 Q -140,110 -30,200 Q 80,110 0,20 Z" fill="none" stroke="#ffffff" stroke-width="5" opacity="0.9"/>
+    <!-- Red Liquid Inside Small Heart -->
+    <path d="M -5,40 Q -30,70 -90,50 Q -120,110 -30,190 Q 60,110 -5,40 Z" fill="#e60000"/>
+  </g>
+
+  <!-- Red Roses at bottom -->
+  <g fill="#990000" stroke="#ff4d4d" stroke-width="2" filter="url(#shadow)">
+    <circle cx="140" cy="680" r="35"/>
+    <circle cx="210" cy="700" r="40"/>
+    <circle cx="280" cy="680" r="35"/>
+  </g>
+
+  <!-- Rose Petals Scattered at Bottom -->
+  <g fill="#cc0000" opacity="0.9" filter="url(#shadow)">
+    <ellipse cx="80" cy="800" rx="25" ry="15" transform="rotate(-20 80 800)"/>
+    <ellipse cx="180" cy="840" rx="30" ry="18" transform="rotate(35 180 840)"/>
+    <ellipse cx="320" cy="820" rx="28" ry="16" transform="rotate(-15 320 820)"/>
+    <ellipse cx="440" cy="850" rx="25" ry="15" transform="rotate(25 440 850)"/>
+    <ellipse cx="250" cy="890" rx="35" ry="20" transform="rotate(10 250 890)"/>
+  </g>
+</svg>

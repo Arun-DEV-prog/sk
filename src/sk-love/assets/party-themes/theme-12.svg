@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 960" width="540" height="960">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#cfd9df" />
+      <stop offset="100%" stop-color="#e2ebf0" />
+    </linearGradient>
+    <linearGradient id="splashGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0052d4" />
+      <stop offset="50%" stop-color="#4364f7" />
+      <stop offset="100%" stop-color="#6fb1fc" />
+    </linearGradient>
+    <linearGradient id="greenSplash" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#11998e" />
+      <stop offset="100%" stop-color="#38ef7d" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="540" height="960" fill="url(#bg)"/>
+
+  <!-- Paint Splash Art Background -->
+  <path d="M-50,0 Q120,200 80,450 T300,700 Q500,850 590,960 L-50,960 Z" fill="url(#greenSplash)" opacity="0.65"/>
+  <path d="M100,-50 Q300,150 250,380 T550,650 Q600,800 590,1000 L590,-50 Z" fill="url(#splashGrad)" opacity="0.7"/>
+
+  <!-- Football Player Silhouette -->
+  <g fill="#1a365d" transform="translate(110, 220) scale(1.1)">
+    <!-- Player running/kicking silhouette -->
+    <circle cx="160" cy="80" r="22"/>
+    <path d="M 160,110 Q 140,160 110,210 L 40,320 L 70,335 L 130,240 L 170,300 L 250,420 L 290,410 L 200,270 L 220,180 L 290,150 L 280,120 L 190,150 Z" />
+    <path d="M 220,180 L 320,120 L 310,95 L 200,140 Z" />
+  </g>
+
+  <!-- Soccer Ball -->
+  <circle cx="410" cy="270" r="28" fill="#ffffff" stroke="#1a365d" stroke-width="4"/>
+  <polygon points="410,252 422,261 418,276 402,276 398,261" fill="#1a365d"/>
+
+  <!-- Text "Football" -->
+  <text x="270" y="720" font-family="'Trebuchet MS', 'Arial Black', sans-serif" font-size="64" font-style="italic" font-weight="900" fill="#0052d4" text-anchor="middle">Football</text>
+</svg>

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 960" width="540" height="960">
+  <defs>
+    <linearGradient id="stadium" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4a0000" />
+      <stop offset="40%" stop-color="#800000" />
+      <stop offset="80%" stop-color="#330000" />
+      <stop offset="100%" stop-color="#120000" />
+    </linearGradient>
+    <radialGradient id="stadiumGlow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#ff3333" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="fireBall" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#ff9900"/>
+      <stop offset="100%" stop-color="#cc0000"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="10" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="540" height="960" fill="url(#stadium)"/>
+  <rect width="540" height="960" fill="url(#stadiumGlow)"/>
+
+  <!-- Stadium Lights -->
+  <g fill="#ffcccc" opacity="0.8" filter="url(#glow)">
+    <circle cx="80" cy="120" r="15"/>
+    <circle cx="140" cy="100" r="15"/>
+    <circle cx="400" cy="100" r="15"/>
+    <circle cx="460" cy="120" r="15"/>
+  </g>
+
+  <!-- Glowing Soccer Ball in Center -->
+  <g filter="url(#glow)" transform="translate(270, 320)">
+    <circle cx="0" cy="0" r="85" fill="url(#fireBall)"/>
+    <polygon points="0,-40 25,-20 15,15 -15,15 -25,-20" fill="#220000"/>
+    <polygon points="0,40 25,20 40,-10 60,-5 45,35" fill="#220000"/>
+    <polygon points="-40,-10 -25,20 0,40 -45,35 -60,-5" fill="#220000"/>
+  </g>
+
+  <!-- Player Champions Silhouettes -->
+  <g fill="#1a0202" stroke="#ff4d4d" stroke-width="2">
+    <!-- Center Player (Messi style 10) -->
+    <path d="M 230,480 L 270,450 L 310,480 L 330,680 L 210,680 Z"/>
+    <circle cx="270" cy="420" r="28"/>
+
+    <!-- Left Player (Ronaldo style 7) -->
+    <path d="M 120,520 L 160,490 L 200,520 L 210,720 L 110,720 Z"/>
+    <circle cx="160" cy="460" r="25"/>
+
+    <!-- Right Player (Neymar style 11) -->
+    <path d="M 340,520 L 380,490 L 420,520 L 430,720 L 330,720 Z"/>
+    <circle cx="380" cy="460" r="25"/>
+  </g>
+
+  <!-- Title Text -->
+  <text x="270" y="810" font-family="'Arial Black', sans-serif" font-size="38" font-weight="900" fill="#ffffff" text-anchor="middle" filter="url(#glow)">CHAMPIONS</text>
+  <text x="270" y="855" font-family="'Arial', sans-serif" font-size="18" font-weight="bold" fill="#ff9999" text-anchor="middle" letter-spacing="6">FOOTBALL STARS</text>
+</svg>
