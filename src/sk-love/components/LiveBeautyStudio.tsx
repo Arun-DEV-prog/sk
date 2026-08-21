@@ -20,12 +20,13 @@ import {
 export interface LiveBeautyStudioProps {
   isOpen: boolean;
   onClose: () => void;
-  currentFilterId: string;
-  onFilterChange: (filterId: string) => void;
-  beautyParams: BeautyParameters;
-  onBeautyParamsChange: (params: BeautyParameters) => void;
-  isBeautyEnabled: boolean;
-  onBeautyToggle: (enabled: boolean) => void;
+  currentFilterId?: string;
+  currentFilter?: string;
+  onFilterChange?: (filterId: string) => void;
+  beautyParams?: BeautyParameters;
+  onBeautyParamsChange?: (params: BeautyParameters) => void;
+  isBeautyEnabled?: boolean;
+  onBeautyToggle?: (enabled: boolean) => void;
   onCompareStateChange?: (isComparing: boolean) => void;
 }
 
@@ -33,10 +34,11 @@ export const LiveBeautyStudio: React.FC<LiveBeautyStudioProps> = ({
   isOpen,
   onClose,
   currentFilterId,
+  currentFilter,
   onFilterChange,
-  beautyParams,
+  beautyParams = DEFAULT_BEAUTY_SETTINGS,
   onBeautyParamsChange,
-  isBeautyEnabled,
+  isBeautyEnabled = true,
   onBeautyToggle,
   onCompareStateChange,
 }) => {
@@ -45,11 +47,13 @@ export const LiveBeautyStudio: React.FC<LiveBeautyStudioProps> = ({
 
   if (!isOpen) return null;
 
+  const activeFilterId = currentFilterId || currentFilter || "none";
+
   const handleSelectFilter = (preset: StreamFilterPreset) => {
-    onFilterChange(preset.id);
+    onFilterChange?.(preset.id);
     if (preset.id !== "none") {
-      onBeautyToggle(true);
-      onBeautyParamsChange(preset.beautyParams);
+      onBeautyToggle?.(true);
+      onBeautyParamsChange?.(preset.beautyParams);
     }
   };
 
@@ -57,16 +61,16 @@ export const LiveBeautyStudio: React.FC<LiveBeautyStudioProps> = ({
     key: keyof BeautyParameters,
     value: number,
   ) => {
-    onBeautyParamsChange({
+    onBeautyParamsChange?.({
       ...beautyParams,
       [key]: value,
     });
   };
 
   const handleResetAll = () => {
-    onFilterChange("none");
-    onBeautyParamsChange(DEFAULT_BEAUTY_SETTINGS);
-    onBeautyToggle(false);
+    onFilterChange?.("none");
+    onBeautyParamsChange?.(DEFAULT_BEAUTY_SETTINGS);
+    onBeautyToggle?.(false);
   };
 
   const handleCompareMouseDown = () => {
@@ -155,7 +159,7 @@ export const LiveBeautyStudio: React.FC<LiveBeautyStudioProps> = ({
           {activeTab === "filters" && (
             <div className="grid grid-cols-3 gap-2.5">
               {STREAM_FILTERS.map((filter) => {
-                const isSelected = currentFilterId === filter.id;
+                const isSelected = activeFilterId === filter.id;
                 return (
                   <button
                     key={filter.id}
@@ -224,7 +228,7 @@ export const LiveBeautyStudio: React.FC<LiveBeautyStudioProps> = ({
                 </div>
                 <button
                   type="button"
-                  onClick={() => onBeautyToggle(!isBeautyEnabled)}
+                  onClick={() => onBeautyToggle?.(!isBeautyEnabled)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                     isBeautyEnabled ? "bg-pink-600" : "bg-slate-700"
                   }`}

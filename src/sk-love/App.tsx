@@ -24480,10 +24480,13 @@ const [isPartyGiftPopupOpen, setIsPartyGiftPopupOpen] = useState<boolean>(false)
                             <LiveBeautyStudio
                               isOpen={isBeautyStudioOpen}
                               onClose={() => setIsBeautyStudioOpen(false)}
+                              currentFilterId={streamFilter}
                               currentFilter={streamFilter}
                               onFilterChange={(filter) => handleSelectStreamFilter(filter)}
                               beautyParams={streamBeautyParams}
                               onBeautyParamsChange={(params) => handleUpdateBeautyParams(params)}
+                              isBeautyEnabled={isAgoraBeautyActive}
+                              onBeautyToggle={(enabled) => setIsAgoraBeautyActive(enabled)}
                               onCompareStateChange={(comparing) => setIsComparingOriginalFeed(comparing)}
                             />
                         </>

@@ -4,20 +4,20 @@ import { BEAUTY_PRESETS } from "../beauty/BeautyPresets";
 import type { BeautyPresetId } from "../beauty/beautyTypes";
 
 type BeautyControlsProps = {
-  beautyEnabled: boolean;
-  beautyStrength: number;
-  beautyPreset: BeautyPresetId;
-  onBeautyToggle: (next: boolean) => void;
-  onBeautyStrengthChange: (next: number) => void;
-  onBeautyPresetChange: (next: BeautyPresetId) => void;
+  beautyEnabled?: boolean;
+  beautyStrength?: number;
+  beautyPreset?: BeautyPresetId;
+  onBeautyToggle?: (next: boolean) => void;
+  onBeautyStrengthChange?: (next: number) => void;
+  onBeautyPresetChange?: (next: BeautyPresetId) => void;
 };
 
 const presetOrder: BeautyPresetId[] = ["natural", "soft", "glow", "studio", "live beauty"];
 
 export default function BeautyControls({
-  beautyEnabled,
-  beautyStrength,
-  beautyPreset,
+  beautyEnabled = true,
+  beautyStrength = 0.5,
+  beautyPreset = "natural",
   onBeautyToggle,
   onBeautyStrengthChange,
   onBeautyPresetChange,
@@ -36,7 +36,7 @@ export default function BeautyControls({
         </div>
         <button
           type="button"
-          onClick={() => onBeautyToggle(!beautyEnabled)}
+          onClick={() => onBeautyToggle?.(!beautyEnabled)}
           className={`rounded-full border px-2 py-1 text-[8px] font-black uppercase tracking-[0.18em] transition ${
             beautyEnabled
               ? "border-pink-400 bg-pink-500 text-white"
@@ -58,7 +58,7 @@ export default function BeautyControls({
           max={100}
           step={1}
           value={Math.round(beautyStrength * 100)}
-          onChange={(event) => onBeautyStrengthChange(Number(event.target.value) / 100)}
+          onChange={(event) => onBeautyStrengthChange?.(Number(event.target.value) / 100)}
           className="h-2 w-full cursor-pointer accent-pink-500"
         />
       </div>
@@ -70,14 +70,14 @@ export default function BeautyControls({
             <button
               key={presetKey}
               type="button"
-              onClick={() => onBeautyPresetChange(presetKey)}
+              onClick={() => onBeautyPresetChange?.(presetKey)}
               className={`rounded-xl border px-2 py-1.5 text-left transition ${
                 active ? "border-pink-400 bg-pink-500/15 text-pink-100" : "border-slate-800 bg-slate-900/70 text-slate-300"
               }`}
             >
               <div className="text-[8px] font-black uppercase tracking-[0.14em]">{presetKey}</div>
               <div className="mt-0.5 text-[7px] text-slate-400">
-                {BEAUTY_PRESETS[presetKey].smoothing.toFixed(2)} smooth
+                {BEAUTY_PRESETS[presetKey]?.smoothing?.toFixed(2) ?? "0.50"} smooth
               </div>
             </button>
           );
