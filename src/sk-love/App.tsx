@@ -9,16 +9,17 @@ import TopGameWinnerBanner from "./components/TopGameWinnerBanner";
 import RoyalGiftBanner from "./components/RoyalGiftBanner";
 import FullScreenGiftOverlay from "./components/FullScreenGiftOverlay";
 import {
-  SnapchatAROverlay,
-  SnapchatBeautyStudio,
-  SnapchatLensCarousel,
-  SnapchatLensId,
-  SnapchatBeautyParams,
-  DEFAULT_BEAUTY_PARAMS,
+  LiveBeautyStudio,
 } from "./components";
-import { DEFAULT_BEAUTY_PRESET, BEAUTY_PRESETS } from "../beauty/BeautyPresets";
-import { BeautyRenderer } from "../beauty/BeautyRenderer";
-import type { BeautyPresetId } from "../beauty/beautyTypes";
+import {
+  BeautyParameters,
+  DEFAULT_BEAUTY_SETTINGS,
+  STREAM_FILTERS,
+  getStreamFilterById,
+  getStreamFilterCss,
+  getStreamFilterClass,
+  applyAgoraBeautyEffect,
+} from "./lib/streamFilters";
 
 import commentImg from "./assets/stream-icons/comment.png";
 import menuImg from "./assets/stream-icons/menu.png";
@@ -1686,20 +1687,8 @@ export default function App() {
   const [isStreamMicMuted, setIsStreamMicMuted] = useState<boolean>(false);
   const [isStreamCameraOff, setIsStreamCameraOff] = useState<boolean>(false);
   const [streamFilter, setStreamFilter] = useState<string>("none");
-  const [beautyEnabled, setBeautyEnabled] = useState<boolean>(true);
-  const [beautyStrength, setBeautyStrength] = useState<number>(0.8);
-  const [beautyPreset, setBeautyPreset] = useState<BeautyPresetId>(DEFAULT_BEAUTY_PRESET);
-  const beautyRendererRef = useRef<BeautyRenderer | null>(null);
   const streamRawCameraStreamRef = useRef<MediaStream | null>(null);
   const [streamVideoTrackReady, setStreamVideoTrackReady] = useState(false);
-
-  useEffect(() => {
-    const renderer = beautyRendererRef.current;
-    if (!renderer) return;
-    renderer.setBeautyEnabled(beautyEnabled);
-    renderer.setStrength(beautyStrength);
-    renderer.setPreset(beautyPreset);
-  }, [beautyEnabled, beautyStrength, beautyPreset]);
   const [streamTitleInput, setStreamTitleInput] = useState<string>(
     "Welcome to my live stream room!",
   );
@@ -1972,34 +1961,54 @@ export default function App() {
     { id: "m5", title: "Sunset Drive", artist: "Vera" },
   ]);
 
-  // ---- Snapchat Pro Beauty & AR Lens Studio States ----
-  const [isSnapchatBeautyStudioOpen, setIsSnapchatBeautyStudioOpen] = useState<boolean>(false);
-  const [isSnapchatLensCarouselOpen, setIsSnapchatLensCarouselOpen] = useState<boolean>(true);
-  const [snapchatLensId, setSnapchatLensId] = useState<SnapchatLensId>("none");
-  const [snapchatBeautyParams, setSnapchatBeautyParams] = useState<SnapchatBeautyParams>(DEFAULT_BEAUTY_PARAMS);
+  // ---- Agora Live Video & Beauty Studio States ----
+  const [isBeautyStudioOpen, setIsBeautyStudioOpen] = useState<boolean>(false);
+  const [streamBeautyParams, setStreamBeautyParams] = useState<BeautyParameters>(DEFAULT_BEAUTY_SETTINGS);
+  const [isAgoraBeautyActive, setIsAgoraBeautyActive] = useState<boolean>(true);
   const [isComparingOriginalFeed, setIsComparingOriginalFeed] = useState<boolean>(false);
 
-  const setPersistentSnapchatLens = (lensId: SnapchatLensId) => {
-    setSnapchatLensId(lensId);
+  // Synchronize Agora hardware-accelerated video beauty filter to the active camera track
+  useEffect(() => {
+    const videoTrack = agoraLocalVideoTrackRef.current;
+    if (videoTrack) {
+      void applyAgoraBeautyEffect(videoTrack, isAgoraBeautyActive, streamBeautyParams);
+    }
+  }, [isAgoraBeautyActive, streamBeautyParams]);
+
+  const handleSelectStreamFilter = (filterId: string) => {
+    setStreamFilter(filterId);
     setActiveLiveRoom((current: any) =>
-      current ? { ...current, snapchatLens: lensId } : current,
+      current ? { ...current, streamFilter: filterId } : current,
     );
     if (activeLiveRoom?.id) {
-      void patchActiveLiveRoom({ snapchatLens: lensId }).catch((error) => {
-        console.warn("Could not persist snapchat lens:", error);
+      void patchActiveLiveRoom({ streamFilter: filterId }).catch((error) => {
+        console.warn("Could not persist stream filter:", error);
       });
+    }
+    const preset = getStreamFilterById(filterId);
+    if (filterId !== "none") {
+      setIsAgoraBeautyActive(true);
+      setStreamBeautyParams(preset.beautyParams);
+      const videoTrack = agoraLocalVideoTrackRef.current;
+      if (videoTrack) {
+        void applyAgoraBeautyEffect(videoTrack, true, preset.beautyParams);
+      }
     }
   };
 
-  const setPersistentSnapchatBeauty = (params: SnapchatBeautyParams) => {
-    setSnapchatBeautyParams(params);
+  const handleUpdateBeautyParams = (params: BeautyParameters) => {
+    setStreamBeautyParams(params);
     setActiveLiveRoom((current: any) =>
-      current ? { ...current, snapchatBeauty: params } : current,
+      current ? { ...current, streamBeautyParams: params } : current,
     );
     if (activeLiveRoom?.id) {
-      void patchActiveLiveRoom({ snapchatBeauty: params }).catch((error) => {
-        console.warn("Could not persist snapchat beauty:", error);
+      void patchActiveLiveRoom({ streamBeautyParams: params }).catch((error) => {
+        console.warn("Could not persist stream beauty params:", error);
       });
+    }
+    const videoTrack = agoraLocalVideoTrackRef.current;
+    if (videoTrack) {
+      void applyAgoraBeautyEffect(videoTrack, isAgoraBeautyActive, params);
     }
   };
 
@@ -5961,33 +5970,29 @@ const [isPartyGiftPopupOpen, setIsPartyGiftPopupOpen] = useState<boolean>(false)
                 });
                 streamRawCameraStreamRef.current = rawCamStream;
 
-                let cameraSourceTrack = rawCamStream.getVideoTracks()[0] ?? null;
-
-                if (beautyEnabled && cameraSourceTrack) {
-                  if (!beautyRendererRef.current) {
-                    beautyRendererRef.current = new BeautyRenderer();
-                  }
-                  beautyRendererRef.current.setBeautyEnabled(true);
-                  beautyRendererRef.current.setStrength(beautyStrength);
-                  beautyRendererRef.current.setPreset(beautyPreset);
-                  const filteredTrack = await beautyRendererRef.current.bindInputTrack(cameraSourceTrack);
-                  videoTrack = AgoraRTC.createCustomVideoTrack({
-                    mediaStreamTrack: filteredTrack,
-                    bitrateMin: 300,
-                    bitrateMax: 800,
-                  });
-                } else {
-                  videoTrack = AgoraRTC.createCustomVideoTrack({
-                    mediaStreamTrack: cameraSourceTrack ?? rawCamStream.getVideoTracks()[0],
-                    bitrateMin: 300,
-                    bitrateMax: 800,
-                  });
-                }
-              } catch (customErr) {
-                console.warn("Custom filtered track fallback to standard camera track:", customErr);
                 videoTrack = await AgoraRTC.createCameraVideoTrack({
                   encoderConfig: "480p_1",
+                  facingMode: "user",
                 });
+              } catch (customErr) {
+                console.warn("Standard camera track error, trying basic getUserMedia fallback:", customErr);
+                try {
+                  const rawCamStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+                    audio: false,
+                  });
+                  streamRawCameraStreamRef.current = rawCamStream;
+                  const cameraSourceTrack = rawCamStream.getVideoTracks()[0] ?? null;
+                  if (cameraSourceTrack) {
+                    videoTrack = AgoraRTC.createCustomVideoTrack({
+                      mediaStreamTrack: cameraSourceTrack,
+                      bitrateMin: 300,
+                      bitrateMax: 800,
+                    });
+                  }
+                } catch {
+                  videoTrack = await AgoraRTC.createCameraVideoTrack();
+                }
               }
             } else {
               videoTrack = await AgoraRTC.createCameraVideoTrack({
@@ -5995,15 +6000,21 @@ const [isPartyGiftPopupOpen, setIsPartyGiftPopupOpen] = useState<boolean>(false)
               });
             }
 
-            agoraLocalVideoTrackRef.current = videoTrack;
-            setStreamVideoTrackReady(true);
-            if (agoraLocalVideoRef.current && !isStreamCameraOff) {
-              try {
-                agoraLocalVideoRef.current.innerHTML = "";
-                videoTrack.play(agoraLocalVideoRef.current);
-              } catch {}
+            if (videoTrack) {
+              agoraLocalVideoTrackRef.current = videoTrack;
+              setStreamVideoTrackReady(true);
+              // Apply Agora hardware-accelerated video beauty filter directly to the stream
+              if (isAgoraBeautyActive) {
+                void applyAgoraBeautyEffect(videoTrack, true, streamBeautyParams);
+              }
+              if (agoraLocalVideoRef.current && !isStreamCameraOff) {
+                try {
+                  agoraLocalVideoRef.current.innerHTML = "";
+                  videoTrack.play(agoraLocalVideoRef.current);
+                } catch {}
+              }
+              tracks.push(videoTrack);
             }
-            tracks.push(videoTrack);
           } catch (err: any) {
             const msg = String(err?.name || err?.message || err || "");
             if (/PERMISSION_DENIED|NotAllowed|Permission dismissed/i.test(msg)) {
@@ -13950,16 +13961,8 @@ const [isPartyGiftPopupOpen, setIsPartyGiftPopupOpen] = useState<boolean>(false)
     agoraStatus === "Live broadcast is publishing." ||
     agoraStatus === "Co-host audio/video connected.";
   const liveDisplayFilter = activeLiveRoom?.streamFilter || streamFilter;
-  const liveDisplayFilterClass =
-    liveDisplayFilter === "pink-glow"
-      ? "brightness-125 saturate-125 hue-rotate-15 contrast-110"
-      : liveDisplayFilter === "golden-magic"
-        ? "sepia-0 contrast-120 saturate-150 brightness-110 hue-rotate-[340deg]"
-        : liveDisplayFilter === "retro-sepia"
-          ? "sepia contrast-85 saturate-100 brightness-95"
-          : liveDisplayFilter === "cyberpunk"
-            ? "hue-rotate-180 brightness-110 saturate-[2.1]"
-            : "";
+  const liveDisplayFilterClass = getStreamFilterClass(liveDisplayFilter);
+  const liveDisplayFilterCss = getStreamFilterCss(liveDisplayFilter);
 
   return (
     <div className={`w-full h-screen max-h-screen overflow-hidden bg-[#070514] flex flex-row items-stretch justify-center text-slate-100 font-sans selection:bg-rose-500 selection:text-white ${isLightAppTheme ? "sk-light-theme" : ""}`}>
@@ -23275,26 +23278,13 @@ const [isPartyGiftPopupOpen, setIsPartyGiftPopupOpen] = useState<boolean>(false)
                           <div className="absolute inset-0 z-0 select-none">
                             <div
                               ref={attachLiveLocalVideoElement}
-                              className={`h-full w-full ${
-                                streamFilter === "pink-glow"
-                                  ? "brightness-125 saturate-125 hue-rotate-15 contrast-110"
-                                  : streamFilter === "golden-magic"
-                                    ? "sepia-0 contrast-120 saturate-150 brightness-110 hue-rotate-[340deg]"
-                                    : streamFilter === "retro-sepia"
-                                      ? "sepia contrast-85 saturate-100 brightness-95"
-                                      : streamFilter === "cyberpunk"
-                                        ? "hue-rotate-180 brightness-110 saturate-[2.1]"
-                                        : "all-none"
+                              style={{
+                                filter: isComparingOriginalFeed ? "none" : getStreamFilterCss(streamFilter),
+                              }}
+                              className={`h-full w-full transition-all duration-300 ${
+                                isComparingOriginalFeed ? "" : getStreamFilterClass(streamFilter)
                               }`}
                             />
-                            {/* Snapchat Pro Beauty & AR Overlay for Host */}
-                            {!isStreamCameraOff && (
-                              <SnapchatAROverlay
-                                lensId={snapchatLensId}
-                                beautyParams={snapchatBeautyParams}
-                                compareOriginal={isComparingOriginalFeed}
-                              />
-                            )}
                             {isStreamCameraOff && (
                               <div className="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-4 text-center select-none z-10 overflow-hidden">
                                 <img
@@ -23940,16 +23930,16 @@ const [isPartyGiftPopupOpen, setIsPartyGiftPopupOpen] = useState<boolean>(false)
                                             {isStreamCameraOff ? "Camera On" : "Camera Off"}
                                           </span>
                                         </button>
-                                        {/* Snapchat Pro Beauty & AR Studio */}
+                                        {/* Agora Live Beauty & Filter Studio */}
                                         <button
                                           type="button"
                                           onClick={() => {
                                             setIsHostHamburgerOpen(false);
-                                            setIsSnapchatBeautyStudioOpen(true);
+                                            setIsBeautyStudioOpen(true);
                                           }}
                                           className="flex flex-col items-center justify-center gap-1 rounded-xl bg-gradient-to-br from-pink-500/25 to-purple-600/25 border border-pink-400/80 py-2 text-pink-300 shadow-[0_0_12px_rgba(244,114,182,0.4)] active:scale-95 transition cursor-pointer"
-                                          aria-label="Snapchat Pro Beauty Studio"
-                                          title="Snapchat Pro Beauty & AR Lenses"
+                                          aria-label="Beauty & Filter Studio"
+                                          title="Beauty & Filter Studio"
                                         >
                                           <Sparkles className="h-4.5 w-4.5 text-pink-300 animate-pulse" strokeWidth={2.4} />
                                           <span className="text-[8px] font-black uppercase text-pink-200">
@@ -24487,13 +24477,13 @@ const [isPartyGiftPopupOpen, setIsPartyGiftPopupOpen] = useState<boolean>(false)
                             )}
 
                             {/* Snapchat Pro Beauty & AR Studio Bottom-Sheet Modal */}
-                            <SnapchatBeautyStudio
-                              isOpen={isSnapchatBeautyStudioOpen}
-                              onClose={() => setIsSnapchatBeautyStudioOpen(false)}
-                              currentLens={snapchatLensId}
-                              onLensChange={(lens) => setPersistentSnapchatLens(lens)}
-                              beautyParams={snapchatBeautyParams}
-                              onBeautyParamsChange={(params) => setPersistentSnapchatBeauty(params)}
+                            <LiveBeautyStudio
+                              isOpen={isBeautyStudioOpen}
+                              onClose={() => setIsBeautyStudioOpen(false)}
+                              currentFilter={streamFilter}
+                              onFilterChange={(filter) => handleSelectStreamFilter(filter)}
+                              beautyParams={streamBeautyParams}
+                              onBeautyParamsChange={(params) => handleUpdateBeautyParams(params)}
                               onCompareStateChange={(comparing) => setIsComparingOriginalFeed(comparing)}
                             />
                         </>
@@ -24582,7 +24572,12 @@ const [isPartyGiftPopupOpen, setIsPartyGiftPopupOpen] = useState<boolean>(false)
                     >
                       {/* Guest Streamer Dashboard Layout - matching Host side UI */}
                         {/* Full-bleed Video Container / Background Stage */}
-                        <div className={`absolute inset-0 z-0 bg-black ${liveDisplayFilterClass}`}>
+                        <div
+                          style={{
+                            filter: liveDisplayFilterCss,
+                          }}
+                          className={`absolute inset-0 z-0 bg-black transition-all duration-300 ${liveDisplayFilterClass}`}
+                        >
                           {(() => {
                             const hostUidStr = String(activeLiveRoom?.hostId || "");
                             const hostVideo = liveRemoteVideos[0];
@@ -24631,21 +24626,6 @@ const [isPartyGiftPopupOpen, setIsPartyGiftPopupOpen] = useState<boolean>(false)
                                   </div>
                                 )}
                               </>
-                            );
-                          })()}
-
-                          {/* Snapchat Pro Beauty & AR Overlay on Host Video for Viewers */}
-                          {(() => {
-                            const hostVideo = liveRemoteVideos[0];
-                            const hostUidStr = String(activeLiveRoom?.hostId || "");
-                            const isHostCameraOff = !hostVideo || remoteCameraOffUids.includes(String(hostVideo.uid)) || (hostUidStr && remoteCameraOffUids.includes(hostUidStr));
-                            if (isHostCameraOff) return null;
-                            return (
-                              <SnapchatAROverlay
-                                lensId={activeLiveRoom?.snapchatLens || "none"}
-                                beautyParams={activeLiveRoom?.snapchatBeauty || DEFAULT_BEAUTY_PARAMS}
-                                compareOriginal={false}
-                              />
                             );
                           })()}
 
